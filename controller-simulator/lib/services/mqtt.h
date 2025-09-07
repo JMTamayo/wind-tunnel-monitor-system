@@ -3,8 +3,8 @@
 
 #include <PubSubClient.h>
 
-#include "collector.h"
 #include "led.h"
+#include "sample.h"
 
 namespace services {
 

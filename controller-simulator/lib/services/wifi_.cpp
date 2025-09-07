@@ -25,7 +25,7 @@ WifiService::WifiService(const char *ssid, const char *password,
 WifiService::~WifiService() { delete this->indicator; }
 
 void WifiService::Connect() {
-  this->indicator->On();
+  this->getIndicator()->On();
 
   WiFi.begin(this->getSsid(), this->getPassword());
 
@@ -56,7 +56,7 @@ void WifiService::Connect() {
   logging::logger->Info("WiFi connection successfully established");
   logging::logger->Info("IP: " + String(WiFi.localIP().toString().c_str()));
 
-  this->indicator->Off();
+  this->getIndicator()->Off();
 }
 
 bool WifiService::IsConnected() { return WiFi.status() == WL_CONNECTED; }

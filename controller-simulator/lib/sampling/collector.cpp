@@ -15,6 +15,10 @@ void Collector::setLastSampleTimeMs(unsigned long lastSampleTimeMs) {
   this->lastSampleTimeMs = lastSampleTimeMs;
 }
 
+services::TimeService *Collector::getTimeService() const {
+  return this->timeService;
+}
+
 Collector::Collector(unsigned long intervalMs,
                      services::TimeService *timeService)
     : intervalMs(intervalMs), lastSampleTimeMs(millis()),
@@ -48,7 +52,7 @@ Sample Collector::Collect() {
   float turbineTransverseForce = random(1800, 2000) / 100.0;
   float turbinePower = random(280, 330) / 100.0;
 
-  String timestamp = this->timeService->NowUTC();
+  String timestamp = this->getTimeService()->NowUTC();
 
   this->setLastSampleTimeMs(millis());
 

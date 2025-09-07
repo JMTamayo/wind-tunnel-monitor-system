@@ -51,8 +51,6 @@ void setup() {
   wifi->Connect();
   mqtt->Connect();
 
-  timeKeeper->Sync();
-
   collector =
       new sampling::Collector(SAMPLING_INTERVAL_MILLISECONDS, timeKeeper);
 

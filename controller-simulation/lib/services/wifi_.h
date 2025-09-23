@@ -1,7 +1,9 @@
 #ifndef WIFI_H
 #define WIFI_H
 
-#include "led.h"
+#include <WiFi.h>
+
+#include "logger.h"
 
 namespace services {
 
@@ -11,19 +13,15 @@ private:
   const char *password;
   const unsigned long maxRetryTimeMs;
 
-  peripherals::Led *indicator;
-
   const char *getSsid() const;
 
   const char *getPassword() const;
 
-  unsigned long getMaxRetryTimeMs() const;
-
-  peripherals::Led *getIndicator();
+  const unsigned long getMaxRetryTimeMs() const;
 
 public:
   WifiService(const char *ssid, const char *password,
-              unsigned long maxRetryTimeMs, peripherals::Led *indicator);
+              const unsigned long maxRetryTimeMs);
 
   ~WifiService();
 

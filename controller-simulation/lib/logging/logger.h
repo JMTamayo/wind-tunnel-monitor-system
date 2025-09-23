@@ -1,6 +1,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include <Arduino.h>
+
 namespace logging {
 
 class Logger {
@@ -14,7 +16,7 @@ public:
 
   ~Logger();
 
-  void Initialize();
+  void initialize();
 
   void Error(String message);
 

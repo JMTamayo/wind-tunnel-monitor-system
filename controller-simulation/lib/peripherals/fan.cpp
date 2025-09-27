@@ -27,7 +27,7 @@ Fan::~Fan() {}
 void Fan::SetFrequency(float frequency) {
   float constrainedFrequency = constrain(frequency, 0.0f, 100.0f);
   unsigned int mappedFrequency =
-      map(constrainedFrequency, 0.0f, 100.0f, 0, 4095);
+      map(constrainedFrequency, 0.0f, 100.0f, 0, 255);
 
   logging::logger->Debug("Setting fan frequency. Requested frequency: " +
                          String(constrainedFrequency) + "%.");

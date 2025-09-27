@@ -9,6 +9,7 @@
 
 #include "controller.h"
 #include "dht22.h"
+#include "fan.h"
 
 #include "mqtt.h"
 #include "wifi_.h"
@@ -19,12 +20,13 @@ TaskHandle_t ControlHandlingTask;
 QueueHandle_t MqttPublishingEventQueue;
 QueueHandle_t MqttSubscriptionsEventQueue;
 
-String TOPIC_CONTROL_FAN_FREQUENCY =
-    String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_CONTROL_FAN_FREQUENCY);
+String TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT =
+    String(MQTT_TOPIC_BASE) +
+    String(MQTT_TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT);
+String TOPIC_FAN_RPM = String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_RPM);
 
 String TOPIC_MEASUREMENTS_AIR_TEMPERATURE =
     String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_AIR_TEMPERATURE);
-
 String TOPIC_MEASUREMENTS_AIR_RELATIVE_HUMIDITY =
     String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_AIR_RELATIVE_HUMIDITY);
 
@@ -36,10 +38,10 @@ void mqttSubscriptionCallback(char *topic, byte *payload, unsigned int length) {
   services::MqttMessage *mqttMessage =
       new services::MqttMessage(topicStr, payloadString);
 
-  if (topicStr == TOPIC_CONTROL_FAN_FREQUENCY) {
+  if (topicStr == TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT) {
     logging::logger->Debug("Received message from MQTT server. Topic: " +
                            topicStr + ". Payload: " + payloadString);
-    xQueueSend(MqttSubscriptionsEventQueue, &mqttMessage, pdMS_TO_TICKS(200));
+    xQueueSend(MqttSubscriptionsEventQueue, &mqttMessage, pdMS_TO_TICKS(100));
 
   } else {
     logging::logger->Error("Received invalid message from MQTT server or "
@@ -67,7 +69,7 @@ void serverHandling(void *parameter) {
 
     } else if (!mqtt->IsConnected()) {
       mqtt->Connect();
-      mqtt->Subscribe(TOPIC_CONTROL_FAN_FREQUENCY);
+      mqtt->Subscribe(TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT);
 
     } else {
       mqtt->Loop();
@@ -84,19 +86,20 @@ void serverHandling(void *parameter) {
 void controlHandling(void *parameter) {
   peripherals::Dht22 *dht22 = new peripherals::Dht22(DHT22_PIN);
 
+  peripherals::Fan *fan = new peripherals::Fan(FAN_CONTROL_PIN);
+
   control::Controller *controller =
-      new control::Controller(MEASURING_INTERVAL_MILLISECONDS, dht22);
+      new control::Controller(MEASURING_INTERVAL_MILLISECONDS, dht22, fan);
 
   services::MqttMessage *mqttMessage;
 
   while (true) {
     if (xQueueReceive(MqttSubscriptionsEventQueue, &mqttMessage,
                       pdMS_TO_TICKS(10)) == pdPASS) {
-      if (String(mqttMessage->GetTopic()) == TOPIC_CONTROL_FAN_FREQUENCY) {
-        logging::logger->Debug(
-            "Processing fan frequency control request. Operation: " +
-            String(mqttMessage->GetPayload()));
-        // TODO: Implement fan frequency control
+      if (String(mqttMessage->GetTopic()) ==
+          TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT) {
+        float fanFrequency = String(mqttMessage->GetPayload()).toFloat();
+        controller->SetFanFrequency(fanFrequency);
       }
       delete mqttMessage;
     }
@@ -122,6 +125,11 @@ void controlHandling(void *parameter) {
         xQueueSend(MqttPublishingEventQueue, &airRelativeHumidityMessage,
                    pdMS_TO_TICKS(10));
       }
+
+      float fanRpm = measure.GetFanProperties().GetRpm();
+      services::MqttMessage *fanRpmMessage =
+          new services::MqttMessage(TOPIC_FAN_RPM, fanRpm);
+      xQueueSend(MqttPublishingEventQueue, &fanRpmMessage, pdMS_TO_TICKS(10));
     }
   }
 }
@@ -132,7 +140,7 @@ void setup() {
   xTaskCreatePinnedToCore(controlHandling, "controlHandling", 10000, NULL, 1,
                           &ControlHandlingTask, 1);
 
-  MqttPublishingEventQueue = xQueueCreate(7, sizeof(services::MqttMessage *));
+  MqttPublishingEventQueue = xQueueCreate(3, sizeof(services::MqttMessage *));
   MqttSubscriptionsEventQueue =
       xQueueCreate(1, sizeof(services::MqttMessage *));
 }

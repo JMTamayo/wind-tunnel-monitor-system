@@ -19,11 +19,11 @@ Dht22::~Dht22() {}
 
 AirProperties Dht22::Read() {
   /*
-  TODO: Implement DHT22 read. The following values are for testing purposes.
-
-  The real function to read the DHT22 is:
   return AirProperties(this->dht.readTemperature(), this->dht.readHumidity());
   */
+
+  // The following values are for testing purposes. You should delete this when
+  // the real prototype is ready.
   return AirProperties(random(240, 260) / 10.0, random(500, 550) / 10.0);
 }
 

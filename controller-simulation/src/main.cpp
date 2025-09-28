@@ -8,6 +8,8 @@
 #include "logger.h"
 
 #include "controller.h"
+
+#include "berm_e3f_ds30c4.h"
 #include "dht22.h"
 #include "fan.h"
 
@@ -20,15 +22,19 @@ TaskHandle_t ControlHandlingTask;
 QueueHandle_t MqttPublishingEventQueue;
 QueueHandle_t MqttSubscriptionsEventQueue;
 
-String TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT =
-    String(MQTT_TOPIC_BASE) +
-    String(MQTT_TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT);
-String TOPIC_FAN_RPM = String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_RPM);
-
 String TOPIC_MEASUREMENTS_AIR_TEMPERATURE =
     String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_AIR_TEMPERATURE);
 String TOPIC_MEASUREMENTS_AIR_RELATIVE_HUMIDITY =
     String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_AIR_RELATIVE_HUMIDITY);
+String TOPIC_MEASUREMENTS_WIND_TURBINE_RPM =
+    String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_WIND_TURBINE_RPM);
+
+String TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT =
+    String(MQTT_TOPIC_BASE) +
+    String(MQTT_TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT);
+String TOPIC_FAN_FREQUENCY_SET_POINT =
+    String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_FREQUENCY_SET_POINT);
+String TOPIC_FAN_RPM = String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_RPM);
 
 void mqttSubscriptionCallback(char *topic, byte *payload, unsigned int length) {
   String topicStr = topic;
@@ -84,14 +90,17 @@ void serverHandling(void *parameter) {
 }
 
 void controlHandling(void *parameter) {
+  peripherals::BermE3fDs30c4 *bermE3fDs30c4 =
+      new peripherals::BermE3fDs30c4(BERM_E3F_DS30C4_PIN);
   peripherals::Dht22 *dht22 = new peripherals::Dht22(DHT22_PIN);
-
   peripherals::Fan *fan = new peripherals::Fan(FAN_CONTROL_PIN);
 
-  control::Controller *controller =
-      new control::Controller(MEASURING_INTERVAL_MILLISECONDS, dht22, fan);
+  control::Controller *controller = new control::Controller(
+      MEASURING_INTERVAL_MILLISECONDS, WIND_TURBINE_PULSE_COUNT_DIVIDER,
+      bermE3fDs30c4, dht22, fan);
 
   services::MqttMessage *mqttMessage;
+  controller->Begin();
 
   while (true) {
     if (xQueueReceive(MqttSubscriptionsEventQueue, &mqttMessage,
@@ -126,6 +135,21 @@ void controlHandling(void *parameter) {
                    pdMS_TO_TICKS(10));
       }
 
+      float windTurbineRpm =
+          measure.GetWindTurbineProperties().GetRotationalFrequencyRpm();
+      services::MqttMessage *windTurbineRpmMessage = new services::MqttMessage(
+          TOPIC_MEASUREMENTS_WIND_TURBINE_RPM, windTurbineRpm);
+      xQueueSend(MqttPublishingEventQueue, &windTurbineRpmMessage,
+                 pdMS_TO_TICKS(10));
+
+      float fanFrequencySetPoint =
+          measure.GetFanProperties().GetFrequencySetPoint();
+      services::MqttMessage *fanFrequencySetPointMessage =
+          new services::MqttMessage(TOPIC_FAN_FREQUENCY_SET_POINT,
+                                    fanFrequencySetPoint);
+      xQueueSend(MqttPublishingEventQueue, &fanFrequencySetPointMessage,
+                 pdMS_TO_TICKS(10));
+
       float fanRpm = measure.GetFanProperties().GetRpm();
       services::MqttMessage *fanRpmMessage =
           new services::MqttMessage(TOPIC_FAN_RPM, fanRpm);
@@ -140,7 +164,7 @@ void setup() {
   xTaskCreatePinnedToCore(controlHandling, "controlHandling", 10000, NULL, 1,
                           &ControlHandlingTask, 1);
 
-  MqttPublishingEventQueue = xQueueCreate(3, sizeof(services::MqttMessage *));
+  MqttPublishingEventQueue = xQueueCreate(5, sizeof(services::MqttMessage *));
   MqttSubscriptionsEventQueue =
       xQueueCreate(1, sizeof(services::MqttMessage *));
 }

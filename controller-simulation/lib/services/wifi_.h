@@ -5,6 +5,8 @@
 
 #include "logger.h"
 
+#include "led.h"
+
 namespace services {
 
 class WifiService {
@@ -13,15 +15,19 @@ private:
   const char *password;
   const unsigned long maxRetryTimeMs;
 
+  peripherals::Led *led;
+
   const char *getSsid() const;
 
   const char *getPassword() const;
 
   const unsigned long getMaxRetryTimeMs() const;
 
+  peripherals::Led *getLed();
+
 public:
   WifiService(const char *ssid, const char *password,
-              const unsigned long maxRetryTimeMs);
+              const unsigned long maxRetryTimeMs, peripherals::Led *led);
 
   ~WifiService();
 

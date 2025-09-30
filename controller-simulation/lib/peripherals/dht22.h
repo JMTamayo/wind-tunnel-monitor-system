@@ -31,6 +31,8 @@ public:
 
   ~Dht22();
 
+  void Begin();
+
   AirProperties Read();
 };
 

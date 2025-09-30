@@ -10,30 +10,33 @@ namespace peripherals {
 class FanProperties {
 private:
   float rpm;
+  float frequencySetPoint;
 
 public:
-  FanProperties(float rpm);
+  FanProperties(float rpm, float frequencySetPoint);
 
   ~FanProperties();
 
   float GetRpm();
+
+  float GetFrequencySetPoint();
 };
 
 class Fan {
 private:
   const unsigned int controlPin;
-  float setPointFrequency;
+  float frequencySetPoint;
 
   const unsigned int getControlPin() const;
 
-  float getSetPointFrequency() const;
-
-  void setSetPointFrequency(float setPointFrequency);
+  void setFrequencySetPoint(float frequencySetPoint);
 
 public:
   Fan(const unsigned int controlPin);
 
   ~Fan();
+
+  float GetFrequencySetPoint() const;
 
   void SetFrequency(float frequency);
 

@@ -6,6 +6,8 @@
 
 #include "logger.h"
 
+#include "led.h"
+
 namespace services {
 
 class MqttMessage {
@@ -42,6 +44,8 @@ private:
   const char *clientId;
   const unsigned long maxRetryTimeMs;
 
+  peripherals::Led *led;
+
   PubSubClient *client;
 
   const char *getServer() const;
@@ -56,16 +60,19 @@ private:
 
   const unsigned long getMaxRetryTimeMs() const;
 
+  peripherals::Led *getLed();
+
   PubSubClient *getClient();
 
 public:
   MqttService(const char *server, const unsigned int port, const char *user,
               const char *password, const char *clientId,
-              const unsigned long maxRetryTimeMs, PubSubClient *client);
+              const unsigned long maxRetryTimeMs, PubSubClient *client,
+              peripherals::Led *led);
 
   ~MqttService();
 
-  void Connect();
+  bool Connect();
 
   bool IsConnected();
 

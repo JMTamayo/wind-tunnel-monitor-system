@@ -19,8 +19,16 @@ void Fan::setFrequencySetPoint(float frequencySetPoint) {
 
 Fan::Fan(const unsigned int controlPin)
     : controlPin(controlPin), frequencySetPoint(0.0f) {
+  /*
+  TODO: Implement the real program to setup the fan.
+  Currently, we are using a dummy fan using a LED. It is pending to define the
+  real fan to implement the real program.
+
+  The following values are for testing purposes.
+  */
   pinMode(this->getControlPin(), OUTPUT);
   analogWrite(this->getControlPin(), this->GetFrequencySetPoint());
+  /* --- */
 }
 
 Fan::~Fan() {}
@@ -28,6 +36,12 @@ Fan::~Fan() {}
 float Fan::GetFrequencySetPoint() const { return this->frequencySetPoint; }
 
 void Fan::SetFrequency(float frequency) {
+  /*
+  TODO: Implement the real program to set the fan frequency.
+  It is pending to define the real fan to implement the real program.
+
+  The following values are for testing purposes.
+  */
   float constrainedFrequency = constrain(frequency, 0.0f, 100.0f);
   unsigned int mappedFrequency =
       map(constrainedFrequency, 0.0f, 100.0f, 0, 255);
@@ -37,14 +51,15 @@ void Fan::SetFrequency(float frequency) {
 
   this->setFrequencySetPoint(constrainedFrequency);
   analogWrite(this->getControlPin(), mappedFrequency);
+  /* --- */
 }
 
 FanProperties Fan::Read() {
   /*
-  TODO: Implement fan read. The following values are for testing purposes.
+  TODO: Implement the real program to read the fan.
+  It is pending to define the real fan to implement the real program.
 
-  The real function to read the DHT22 is:
-  // TODO: Include real fan read.
+  The following values are for testing purposes.
   */
   float rpm = 0.0f;
 
@@ -55,6 +70,7 @@ FanProperties Fan::Read() {
   }
 
   return FanProperties(rpm, frequencySetPoint);
+  /* --- */
 }
 
 } // namespace peripherals

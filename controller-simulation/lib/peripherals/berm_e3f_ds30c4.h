@@ -49,7 +49,7 @@ public:
 
   ~BermE3fDs30c4();
 
-  void Restart();
+  void Begin();
 
   RotationalFrequency Read(unsigned int pulseCountDivider);
 };

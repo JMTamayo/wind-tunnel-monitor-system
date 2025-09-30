@@ -42,25 +42,45 @@ void BermE3fDs30c4::setLastMeasurementTimeMs(
 }
 
 BermE3fDs30c4::BermE3fDs30c4(const unsigned int pin) : pin(pin) {
+  /*
+  TODO: Implement the real program to setup the sensor.
+  Documentation:
+  - Datasheet:
+    https://www.alldatasheet.com/datasheet-pdf/view/168739/OMRON/E3F2-DS30C4-P1.html
+
+  Setup the pin as input with pull-up resistor.
+  ```c++
   pinMode(this->getPin(), INPUT_PULLUP);
+  ```
+
+  Attach the interrupt to the pin.
+  ```c++
   attachInterrupt(digitalPinToInterrupt(pin), incrementPulseCount, RISING);
+  ```
+  */
 }
 
 BermE3fDs30c4::~BermE3fDs30c4() {}
 
-void BermE3fDs30c4::Restart() {
+void BermE3fDs30c4::Begin() {
   pulseCounter = 0;
   this->setLastMeasurementTimeMs(millis());
 }
 
 RotationalFrequency BermE3fDs30c4::Read(unsigned int pulseCountDivider) {
   /*
-  unsigned long pulseCount = pulseCounter;
-  */
+  TODO: Implement the real program to read the sensor.
 
-  // The following values are for testing purposes. You should delete this when
-  // the real prototype is ready.
+  Get the pulse count.
+  ```c++
+  unsigned long pulseCount = pulseCounter;
+  ```
+
+  The following values are for testing purposes.
+  */
   unsigned long pulseCount = random(100, 110);
+  /* --- */
+
   unsigned long sampleTimeSeconds =
       (millis() - this->getLastMeasurementTimeMs()) / 1000;
 
@@ -68,7 +88,7 @@ RotationalFrequency BermE3fDs30c4::Read(unsigned int pulseCountDivider) {
       (float)(pulseCount / sampleTimeSeconds) / (float)pulseCountDivider;
   float rotationalFrequencyRpm = rotationalFrequencyHz * 60;
 
-  this->Restart();
+  this->Begin();
 
   return RotationalFrequency(pulseCount, sampleTimeSeconds,
                              rotationalFrequencyHz, rotationalFrequencyRpm);

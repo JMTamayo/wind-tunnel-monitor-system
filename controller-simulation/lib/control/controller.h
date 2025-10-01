@@ -27,12 +27,13 @@ private:
 
   float fanFrequencySetPoint;
   float fanRpm;
+  float fanTotalActivePower;
 
 public:
   Measures(float airTemperature, float airRelativeHumidity, float airVelocity,
            float dynamicPressure, float airFlow, float airFlowCfm,
            float airDensity, float windTurbineRpm, float windTurbinePower,
-           float fanFrequencySetPoint, float fanRpm);
+           float fanFrequencySetPoint, float fanRpm, float fanTotalActivePower);
 
   ~Measures();
 
@@ -57,6 +58,8 @@ public:
   float GetFanFrequencySetPoint();
 
   float GetFanRpm();
+
+  float GetFanTotalActivePower();
 };
 
 class Controller {

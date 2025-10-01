@@ -6,12 +6,13 @@ Measures::Measures(float airTemperature, float airRelativeHumidity,
                    float airVelocity, float dynamicPressure, float airFlow,
                    float airFlowCfm, float airDensity, float windTurbineRpm,
                    float windTurbinePower, float fanFrequencySetPoint,
-                   float fanRpm)
+                   float fanRpm, float fanTotalActivePower)
     : airTemperature(airTemperature), airRelativeHumidity(airRelativeHumidity),
       airVelocity(airVelocity), dynamicPressure(dynamicPressure),
       airFlow(airFlow), airFlowCfm(airFlowCfm), airDensity(airDensity),
       windTurbineRpm(windTurbineRpm), windTurbinePower(windTurbinePower),
-      fanFrequencySetPoint(fanFrequencySetPoint), fanRpm(fanRpm) {}
+      fanFrequencySetPoint(fanFrequencySetPoint), fanRpm(fanRpm),
+      fanTotalActivePower(fanTotalActivePower) {}
 
 Measures::~Measures() {}
 
@@ -36,6 +37,8 @@ float Measures::GetWindTurbinePower() { return this->windTurbinePower; }
 float Measures::GetFanFrequencySetPoint() { return this->fanFrequencySetPoint; }
 
 float Measures::GetFanRpm() { return this->fanRpm; }
+
+float Measures::GetFanTotalActivePower() { return this->fanTotalActivePower; }
 
 const unsigned long Controller::getIntervalMs() const {
   return this->intervalMs;
@@ -97,6 +100,7 @@ void Controller::Begin() {
   this->getBermE3fDs30c4()->Begin();
   this->getDht22()->Begin();
   this->getMpxv7002dp_Adc1115()->Begin();
+  this->getFan()->Begin();
 }
 
 bool Controller::IsMeasurementTimeReached() {
@@ -125,7 +129,7 @@ Measures Controller::Measure() {
       airVelocity, dynamicPressure.GetPressure(), airFlow, airFlowCfm,
       airDensity, windTurbineProperties.GetRotationalFrequencyRpm(),
       windTurbinePower, fanProperties.GetFrequencySetPoint(),
-      fanProperties.GetRpm());
+      fanProperties.GetRpm(), fanProperties.GetTotalActivePower());
 
   this->setLastMeasurementTimeMs(millis());
   return measures;

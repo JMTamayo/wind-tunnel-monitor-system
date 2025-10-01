@@ -2,8 +2,10 @@
 
 namespace peripherals {
 
-FanProperties::FanProperties(float rpm, float frequencySetPoint)
-    : rpm(rpm), frequencySetPoint(frequencySetPoint) {}
+FanProperties::FanProperties(float rpm, float frequencySetPoint,
+                             float totalActivePower)
+    : rpm(rpm), frequencySetPoint(frequencySetPoint),
+      totalActivePower(totalActivePower) {}
 
 FanProperties::~FanProperties() {}
 
@@ -11,14 +13,18 @@ float FanProperties::GetRpm() { return this->rpm; }
 
 float FanProperties::GetFrequencySetPoint() { return this->frequencySetPoint; }
 
+float FanProperties::GetTotalActivePower() { return this->totalActivePower; }
+
 const unsigned int Fan::getControlPin() const { return this->controlPin; }
 
 void Fan::setFrequencySetPoint(float frequencySetPoint) {
   this->frequencySetPoint = frequencySetPoint;
 }
 
-Fan::Fan(const unsigned int controlPin)
-    : controlPin(controlPin), frequencySetPoint(0.0f) {
+peripherals::SDM630MCT *Fan::getSdm630mct() { return this->sdm630mct; }
+
+Fan::Fan(const unsigned int controlPin, peripherals::SDM630MCT *sdm630mct)
+    : controlPin(controlPin), frequencySetPoint(0.0f), sdm630mct(sdm630mct) {
   /*
   TODO: Implement the real program to setup the fan.
   Currently, we are using a dummy fan using a LED. It is pending to define the
@@ -32,6 +38,17 @@ Fan::Fan(const unsigned int controlPin)
 }
 
 Fan::~Fan() {}
+
+void Fan::Begin() {
+  /*
+  TODO: Implement the real program to begin the device.
+
+  We need to begin the elements of the fan as follows:
+  ```c++
+  this->getSdm630mct()->Begin();
+  ```
+  */
+}
 
 float Fan::GetFrequencySetPoint() const { return this->frequencySetPoint; }
 
@@ -69,7 +86,11 @@ FanProperties Fan::Read() {
     rpm = max(0.0f, (float)(frequencySetPoint * 1500.0 / 100.0 + deviation));
   }
 
-  return FanProperties(rpm, frequencySetPoint);
+  peripherals::ElectricProperties electricProperties =
+      this->getSdm630mct()->Read();
+  float totalActivePower = electricProperties.GetTotalActivePower();
+
+  return FanProperties(rpm, frequencySetPoint, totalActivePower);
   /* --- */
 }
 

@@ -17,6 +17,7 @@
   "/fanFrequencySetPointRequest"
 #define MQTT_TOPIC_FAN_FREQUENCY_SET_POINT "/fanFrequencySetPoint"
 #define MQTT_TOPIC_FAN_RPM "/fanRpm"
+#define MQTT_TOPIC_FAN_TOTAL_ACTIVE_POWER "/fanPower"
 
 #define MEASURING_INTERVAL_MILLISECONDS 2000 // ms
 
@@ -41,3 +42,9 @@
 #define MPXV7002DP_ADC1115_VOLTAGE_OFFSET 2.5      // V
 #define MPXV7002DP_ADC1115_VOLTAGE_SENSITIVITY 1.0 // V/kPa
 #define AIR_DENSITY 1.10                           // kg/m^3
+
+// Configuration parameters for SDM630MCT:
+#define SDM630MCT_RX2_PIN 16
+#define SDM630MCT_TX2_PIN 17
+#define SDM630MCT_DEVICE_ADDRESS 1
+#define SDM630MCT_TOTAL_ACTIVE_POWER_ADDRESS 52

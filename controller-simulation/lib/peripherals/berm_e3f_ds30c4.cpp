@@ -78,7 +78,7 @@ RotationalFrequency BermE3fDs30c4::Read(unsigned int pulseCountDivider) {
 
   The following values are for testing purposes.
   */
-  unsigned long pulseCount = random(100, 110);
+  unsigned long pulseCount = random(100, 105);
   /* --- */
 
   unsigned long sampleTimeSeconds =

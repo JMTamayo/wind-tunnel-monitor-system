@@ -67,7 +67,7 @@ DynamicPressure MPXV7002DP_ADC1115::Read(float airDensity) {
 
   The following values are for testing purposes.
   */
-  float voltage = random(2550, 2600) / 1000.0f;
+  float voltage = random(2550, 2560) / 1000.0f;
   /* --- */
 
   float pressure =

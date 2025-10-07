@@ -8,10 +8,10 @@
 #include "logger.h"
 
 #include "controller.h"
+#include "measurements.h"
 
 #include "berm_e3f_ds30c4.h"
 #include "dht22.h"
-#include "fan.h"
 #include "mpxv7002dp_adc1115.h"
 
 #include "mqtt.h"
@@ -49,8 +49,7 @@ String TOPIC_CONTROL_FAN_FREQUENCY_SET_POINT =
 String TOPIC_FAN_FREQUENCY_SET_POINT =
     String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_FREQUENCY_SET_POINT);
 String TOPIC_FAN_RPM = String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_RPM);
-String TOPIC_FAN_TOTAL_ACTIVE_POWER =
-    String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_TOTAL_ACTIVE_POWER);
+String TOPIC_FAN_POWER = String(MQTT_TOPIC_BASE) + String(MQTT_TOPIC_FAN_POWER);
 
 void mqttSubscriptionCallback(char *topic, byte *payload, unsigned int length) {
   String topicStr = topic;
@@ -110,20 +109,19 @@ void serverHandling(void *parameter) {
 void controlHandling(void *parameter) {
   peripherals::BermE3fDs30c4 *bermE3fDs30c4 =
       new peripherals::BermE3fDs30c4(BERM_E3F_DS30C4_PIN);
+
   peripherals::Dht22 *dht22 = new peripherals::Dht22(DHT22_PIN);
+
   peripherals::MPXV7002DP_ADC1115 *mpxv7002dpAdc1115 =
       new peripherals::MPXV7002DP_ADC1115(
           MPXV7002DP_ADC1115_CHANNEL, MPXV7002DP_ADC1115_VOLTAGE_OFFSET,
           MPXV7002DP_ADC1115_VOLTAGE_SENSITIVITY);
-  peripherals::SDM630MCT *sdm630mct = new peripherals::SDM630MCT(
-      SDM630MCT_RX2_PIN, SDM630MCT_TX2_PIN, SDM630MCT_DEVICE_ADDRESS,
-      SDM630MCT_TOTAL_ACTIVE_POWER_ADDRESS);
-  peripherals::Fan *fan = new peripherals::Fan(FAN_CONTROL_PIN, sdm630mct);
 
   control::Controller *controller = new control::Controller(
       MEASURING_INTERVAL_MILLISECONDS, WIND_TURBINE_PULSE_COUNT_DIVIDER,
-      AIR_DENSITY, CROSS_SECTION_AREA, bermE3fDs30c4, dht22, mpxv7002dpAdc1115,
-      fan);
+      AIR_DENSITY, CROSS_SECTION_AREA,
+      CUBIC_METERS_PER_SECOND_TO_CUBIC_FEET_PER_MINUTE, bermE3fDs30c4, dht22,
+      mpxv7002dpAdc1115);
 
   services::MqttMessage *mqttMessage;
 
@@ -228,12 +226,11 @@ void controlHandling(void *parameter) {
           new services::MqttMessage(TOPIC_FAN_RPM, fanRpm);
       xQueueSend(MqttPublishingEventQueue, &fanRpmMessage, pdMS_TO_TICKS(10));
 
-      float fanTotalActivePower = measure.GetFanTotalActivePower();
-      if (!isnan(fanTotalActivePower)) {
-        services::MqttMessage *fanTotalActivePowerMessage =
-            new services::MqttMessage(TOPIC_FAN_TOTAL_ACTIVE_POWER,
-                                      fanTotalActivePower);
-        xQueueSend(MqttPublishingEventQueue, &fanTotalActivePowerMessage,
+      float fanPower = measure.GetFanPower();
+      if (!isnan(fanPower)) {
+        services::MqttMessage *fanPowerMessage =
+            new services::MqttMessage(TOPIC_FAN_POWER, fanPower);
+        xQueueSend(MqttPublishingEventQueue, &fanPowerMessage,
                    pdMS_TO_TICKS(10));
       }
     }

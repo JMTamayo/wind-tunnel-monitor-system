@@ -38,8 +38,6 @@ public:
 
   ~MPXV7002DP_ADC1115();
 
-  void Begin();
-
   DynamicPressure Read(float airDensity);
 };
 

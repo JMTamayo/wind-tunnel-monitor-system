@@ -36,24 +36,22 @@ MPXV7002DP_ADC1115::MPXV7002DP_ADC1115(unsigned int channel,
   #include <Adafruit_ADS1X15.h>
   Adafruit_ADS1115 ads;
   ```
-  */
-}
 
-MPXV7002DP_ADC1115::~MPXV7002DP_ADC1115() {}
-
-void MPXV7002DP_ADC1115::Begin() {
-  /*
-  TODO: Implement the real program to begin the sensor.
-
-  We need to begin the reading of the sensor as follows:
+    We need to begin the reading of the sensor as follows:
   ```c++
   if (!ads.begin()) {
     Serial.println("Failed to initialize the ADC.");
     while (1);
   }
   ```
+
+  Since several sensors can use this module to be read, evaluate the possibility
+  of creating the configuration in the main loop and passing the ADC as a
+  parameter, so that each one reads through its corresponding channel.
   */
 }
+
+MPXV7002DP_ADC1115::~MPXV7002DP_ADC1115() {}
 
 DynamicPressure MPXV7002DP_ADC1115::Read(float airDensity) {
   /*

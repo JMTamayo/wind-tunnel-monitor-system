@@ -17,12 +17,13 @@
   "/fanFrequencySetPointRequest"
 #define MQTT_TOPIC_FAN_FREQUENCY_SET_POINT "/fanFrequencySetPoint"
 #define MQTT_TOPIC_FAN_RPM "/fanRpm"
-#define MQTT_TOPIC_FAN_TOTAL_ACTIVE_POWER "/fanPower"
+#define MQTT_TOPIC_FAN_POWER "/fanPower"
 
 #define MEASURING_INTERVAL_MILLISECONDS 2000 // ms
 
 // Configuration parameters for wind tunnel:
 #define CROSS_SECTION_AREA 1.7 // m^2
+#define CUBIC_METERS_PER_SECOND_TO_CUBIC_FEET_PER_MINUTE 2118.8799727597
 
 // Configuration parameters for BERM-E3F-DS30C4:
 #define BERM_E3F_DS30C4_PIN 34
@@ -30,9 +31,6 @@
 
 // Configuration parameters for DHT22:
 #define DHT22_PIN 32
-
-// Configuration parameters for FAN:
-#define FAN_CONTROL_PIN 23
 
 // Configuration parameters for indicator LED for network connections:
 #define INDICATOR_LED_PIN 2
@@ -42,9 +40,3 @@
 #define MPXV7002DP_ADC1115_VOLTAGE_OFFSET 2.5      // V
 #define MPXV7002DP_ADC1115_VOLTAGE_SENSITIVITY 1.0 // V/kPa
 #define AIR_DENSITY 1.10                           // kg/m^3
-
-// Configuration parameters for SDM630MCT:
-#define SDM630MCT_RX2_PIN 16
-#define SDM630MCT_TX2_PIN 17
-#define SDM630MCT_DEVICE_ADDRESS 1
-#define SDM630MCT_TOTAL_ACTIVE_POWER_ADDRESS 52
